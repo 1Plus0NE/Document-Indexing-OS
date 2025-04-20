@@ -19,6 +19,6 @@
 typedef struct msg{
     char info[64];
     int pid;
-} Msg;
+}Msg;
 
 #endif
