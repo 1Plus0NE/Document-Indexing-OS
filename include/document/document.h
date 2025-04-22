@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include "glib.h"
 
 #ifndef DOCUMENT_H
 #define DOCUMENT_H
@@ -40,6 +41,42 @@ Document* createDocument(char* title, char* authors, char* path, int year, int i
  * @return document's ID
  */
 int getDocumentID(Document* doc);
+
+/**
+ * Returns a document's title
+ * 
+ * @param doc document's structure
+ * 
+ * @return document's title
+ */
+char* getDocumentTitle(Document* doc);
+
+/**
+ * Returns the document's authors
+ * 
+ * @param doc document's structure
+ * 
+ * @return document's authors
+ */
+char* getDocumentAuthors(Document* doc);
+
+/**
+ * Returns a document's year
+ * 
+ * @param doc document's structure
+ * 
+ * @return document's year
+ */
+int getDocumentYear(Document* doc);
+
+/**
+ * Returns a document's path
+ * 
+ * @param doc document's structure
+ * 
+ * @return document's path
+ */
+char* getDocumentPath(Document* doc);
 
 /**
  * Frees the Document

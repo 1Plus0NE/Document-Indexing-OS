@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdbool.h>
 #include <glib.h>
 
 // Struct to store all documents indexed in a GHashTable
@@ -28,12 +29,22 @@ DocumentManager* initDocumentManager();
 void indexDocument(DocumentManager* docManager, Document* doc);
 
 /**
+ * Checks if a document with the given key exists
+ * 
+ * @param docManager The structure to check if key corresponds to a document
+ * @param key The document key to check for existence
+ * 
+ * @return TRUE if a document with the specified key exists, FALSE otherwise
+ */
+bool containsDocumentID(DocumentManager* docManager, int key);
+
+/**
  * Removes a document from the DocumentManager's GHashTable
  * 
  * @param docManager The structure to remove the document
- * @param doc The document to be removed
+ * @param key The key that identifies its document to be removed
  */
-void removeDocument(DocumentManager* docManager, Document* doc);
+void removeDocument(DocumentManager* docManager, int key);
 
 /**
  * Finds a document in the DocumentManager by its key
@@ -51,7 +62,7 @@ Document* findDocument(DocumentManager* docManager, int key);
  * @param docManager The DocumentManager structure to be freed
  * 
  */
-void freeDocumentManager(DocumentManager* docManager)
+void freeDocumentManager(DocumentManager* docManager);
 
 #endif
 

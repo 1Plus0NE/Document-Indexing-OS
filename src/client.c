@@ -19,8 +19,25 @@ int main (int argc, char * argv[]){
 	// aux struct
 	Msg msg;
 	msg.pid = pid;
-	strncpy(msg.info, argv[1], sizeof(msg.info) - 1); // simulation of a command to be sent/executed in the server
-    msg.info[sizeof(msg.info) - 1] = '\0'; 
+	msg.cmdType = parseCommand(argv[1]);
+
+	if(msg.cmdType == CMD_INDEX){
+		if(!validateFields(argv[2], argv[3], argv[5])){
+			char* warning = "Warning: one of the fields exceeds its max size!\n"
+							"Title MAX SIZE: 200 Bytes\n"
+							"Authors MAX SIZE: 200 Bytes\n"
+							"Path MAX SIZE: 64 Bytes.";
+			write(1, warning, strlen(warning));
+			exit(1);
+							
+		}
+		snprintf(msg.info, 512, "%s|%s|%s|%s", argv[2], argv[3], argv[4], argv[5]); // fields to index a document
+	}
+
+	if(msg.cmdType == CMD_SEARCH || msg.cmdType == CMD_REMOVE){
+		strncpy(msg.info, argv[2], sizeof(msg.info) - 1); 
+		msg.info[sizeof(msg.info) - 1] = '\0'; 
+	}
 
 	int fd = open(SERVER, O_WRONLY);
 	if(fd < 0){
@@ -51,7 +68,8 @@ int main (int argc, char * argv[]){
 		_exit(1);
 	}
 
-	printf("Server received my message: %s\n", msg.info);
+	write(1, msg.response, strlen(msg.response));
+	//printf("Server received my message: %s\n", msg.info);
 
 	close(fd_client);
 	unlink(client_name);

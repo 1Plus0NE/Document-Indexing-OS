@@ -1,17 +1,4 @@
 #include "../../include/document/document.h"
-/* --
-    should probably be in utils.h 
-    has the purpose to check doc's fields before we create a document structure
-    --
-int validateDocument(Document* doc){
-    if ((strlen(doc->title) > TITLE_SIZE) ||
-        (strlen(doc->authors) > AUTHORS_SIZE) ||
-        (strlen(doc->path) > PATH_SIZE))
-        return 0;
-    
-    return 1;
-}
-*/
 
 Document* createDocument(char* title, char* authors, char* path, int year, int id){
     Document* doc = (Document*)malloc(sizeof(Document));
@@ -34,6 +21,22 @@ int getDocumentID(Document* doc){
     return doc -> id;
 }
 
+char* getDocumentTitle(Document* doc){
+    return doc -> title;
+}
+
+char* getDocumentAuthors(Document* doc){
+    return doc -> authors;
+}
+
+int getDocumentYear(Document* doc){
+    return doc -> year;
+}
+
+char* getDocumentPath(Document* doc){
+    return doc -> path;
+}
+
 void freeDocument(Document* doc){
-    free(doc);
+    g_free(doc);
 }

@@ -1,8 +1,11 @@
 #include "../include/utils.h"
+#include "../include/document/documentManager.h"
 
 int main(int argc, char *argv[]){
 
     unlink(SERVER);  
+    DocumentManager* docManager = initDocumentManager();
+    int id_number = 1; // document's ID, later on we would like to update this id_number within our load file
 
     if(mkfifo(SERVER, 0666)){
         perror("Error creating FIFO.");
@@ -28,7 +31,42 @@ int main(int argc, char *argv[]){
             return 0;
         }
 
-        printf("Received a message from client [PID: %d]: %s\n", msg.pid, msg.info);
+        char* commandRequest = commandTypeToString(msg.cmdType);
+        printf("Received a resquest from client [PID: %d]: %s %s\n", msg.pid, commandRequest, msg.info);
+
+        if(msg.cmdType == CMD_INDEX){
+            char *title = strtok(msg.info, "|");
+            char *authors = strtok(NULL, "|");
+            char *year_str = strtok(NULL, "|");
+            char *path = strtok(NULL, "|");
+            int year = atoi(year_str);
+
+            Document* doc = createDocument(title, authors, path, year, id_number);
+            indexDocument(docManager, doc);
+            snprintf(msg.response, sizeof(msg.response), "Document %d indexed with success.\n", id_number);
+            printf("Document %d indexed with success.\n", id_number);
+            id_number++; // update so the next document never has the same ID from the previous doc
+        }
+
+        if(msg.cmdType == CMD_SEARCH){
+            int key = atoi(msg.info);
+            if(containsDocumentID(docManager, key)){
+                Document* doc = findDocument(docManager, key);
+                char* title = getDocumentTitle(doc);
+                char* authors = getDocumentAuthors(doc);
+                int year = getDocumentYear(doc);
+                char* path = getDocumentPath(doc);
+                snprintf(msg.response, sizeof(msg.response), "Title: %s\nAuthors: %s\nYear: %d\nPath: %s\n", title, authors, year, path);
+            } else strcpy(msg.response, "Document's ID provided does not exist.\n");
+        }
+
+        if(msg.cmdType == CMD_REMOVE){
+            int key = atoi(msg.info);
+            if(containsDocumentID(docManager, key)){
+                removeDocument(docManager, key);
+                snprintf(msg.response, sizeof(msg.response), "Index entry %d deleted with success.\n", key);
+            } else strcpy(msg.response, "Document's ID provided does not exist.\n");
+        }
 
         // answer for client's fifo
         char fifo_name[50];
@@ -42,6 +80,7 @@ int main(int argc, char *argv[]){
 
     close(fd);
     close(fd_dummy);
+    freeDocumentManager(docManager);
     unlink(SERVER);
 
     return 0;

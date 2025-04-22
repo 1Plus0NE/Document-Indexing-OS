@@ -7,7 +7,7 @@ DocumentManager* initDocumentManager(){
         exit(EXIT_FAILURE);
     }
 
-    docManager -> documentTable = g_hash_table_new_full(g_int_hash, g_int_equal, free, freeDocument);
+    docManager -> documentTable = g_hash_table_new_full(g_int_hash, g_int_equal, free, (GDestroyNotify)freeDocument);
 
     return docManager;
 }
@@ -22,6 +22,13 @@ void indexDocument(DocumentManager* docManager, Document* doc){
         *key = getDocumentID(doc);
         g_hash_table_insert(docManager -> documentTable, key, doc);
     }
+}
+
+bool containsDocumentID(DocumentManager* docManager, int key){
+    if(docManager && docManager -> documentTable){
+        return g_hash_table_contains(docManager -> documentTable, &key);
+    }
+    return false;
 }
 
 void removeDocument(DocumentManager* docManager, int key){
