@@ -48,23 +48,20 @@ int main(int argc, char *argv[]){
             id_number++; // update so the next document never has the same ID from the previous doc
         }
 
-        if(msg.cmdType == CMD_SEARCH){
+        if(msg.cmdType == CMD_SEARCH || msg.cmdType == CMD_REMOVE){
             int key = atoi(msg.info);
             if(containsDocumentID(docManager, key)){
-                Document* doc = findDocument(docManager, key);
-                char* title = getDocumentTitle(doc);
-                char* authors = getDocumentAuthors(doc);
-                int year = getDocumentYear(doc);
-                char* path = getDocumentPath(doc);
-                snprintf(msg.response, sizeof(msg.response), "Title: %s\nAuthors: %s\nYear: %d\nPath: %s\n", title, authors, year, path);
-            } else strcpy(msg.response, "Document's ID provided does not exist.\n");
-        }
-
-        if(msg.cmdType == CMD_REMOVE){
-            int key = atoi(msg.info);
-            if(containsDocumentID(docManager, key)){
-                removeDocument(docManager, key);
-                snprintf(msg.response, sizeof(msg.response), "Index entry %d deleted with success.\n", key);
+                if(msg.cmdType == CMD_SEARCH){
+                    Document* doc = findDocument(docManager, key);
+                    char* title = getDocumentTitle(doc);
+                    char* authors = getDocumentAuthors(doc);
+                    int year = getDocumentYear(doc);
+                    char* path = getDocumentPath(doc);
+                    snprintf(msg.response, sizeof(msg.response), "Title: %s\nAuthors: %s\nYear: %d\nPath: %s\n", title, authors, year, path);
+                } else if(msg.cmdType == CMD_SEARCH){
+                    removeDocument(docManager, key);
+                    snprintf(msg.response, sizeof(msg.response), "Index entry %d deleted with success.\n", key);
+                }   
             } else strcpy(msg.response, "Document's ID provided does not exist.\n");
         }
 

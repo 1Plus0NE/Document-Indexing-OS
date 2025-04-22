@@ -26,10 +26,9 @@ int main (int argc, char * argv[]){
 			char* warning = "Warning: one of the fields exceeds its max size!\n"
 							"Title MAX SIZE: 200 Bytes\n"
 							"Authors MAX SIZE: 200 Bytes\n"
-							"Path MAX SIZE: 64 Bytes.";
+							"Path MAX SIZE: 64 Bytes.\n";
 			write(1, warning, strlen(warning));
-			exit(1);
-							
+			exit(1);		
 		}
 		snprintf(msg.info, 512, "%s|%s|%s|%s", argv[2], argv[3], argv[4], argv[5]); // fields to index a document
 	}
@@ -37,6 +36,16 @@ int main (int argc, char * argv[]){
 	if(msg.cmdType == CMD_SEARCH || msg.cmdType == CMD_REMOVE){
 		strncpy(msg.info, argv[2], sizeof(msg.info) - 1); 
 		msg.info[sizeof(msg.info) - 1] = '\0'; 
+	}
+
+	if(msg.cmdType == CMD_INVALID){
+		char* invalid = "Warning: invalid argument!\n"
+						"Consider the following commands:\n"
+						"INDEX: -a " "\"title\" " "\"authors\" " "\"year\" " "\"path\"\n"
+						"SEARCH: -c " "\"id\"\n"
+						"REMOVE: -d " "\"id\"\n";
+		write(1, invalid, strlen(invalid));
+		exit(1);
 	}
 
 	int fd = open(SERVER, O_WRONLY);
@@ -69,7 +78,6 @@ int main (int argc, char * argv[]){
 	}
 
 	write(1, msg.response, strlen(msg.response));
-	//printf("Server received my message: %s\n", msg.info);
 
 	close(fd_client);
 	unlink(client_name);
