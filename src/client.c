@@ -1,6 +1,6 @@
 #include "../include/utils.h"
 
-int main (int argc, char * argv[]){
+int main(int argc, char * argv[]){
 
 	if(argc < 2){
 		printf("Missing argument.\n");
@@ -11,12 +11,9 @@ int main (int argc, char * argv[]){
 	char client_name[64];
 	sprintf(client_name, CLIENT"_%d", pid);
 
-	if(mkfifo(client_name, 0644) < 0){
-		perror("Error creating fifo");
-		_exit(1);
-	}
+	createFIFO(client_name);
 
-	// aux struct
+	// Command struct
 	Msg msg;
 	msg.pid = pid;
 	msg.cmdType = parseCommand(argv[1]);
@@ -38,6 +35,10 @@ int main (int argc, char * argv[]){
 		msg.info[sizeof(msg.info) - 1] = '\0'; 
 	}
 
+	if(msg.cmdType == CMD_NRLINES){
+		snprintf(msg.info, 512, "%s|%s", argv[2], argv[3]); // eg. 1|sky
+	}
+
 	if(msg.cmdType == CMD_INVALID){
 		char* invalid = "Warning: invalid argument!\n"
 						"Consider the following commands:\n"
@@ -47,6 +48,7 @@ int main (int argc, char * argv[]){
 		write(1, invalid, strlen(invalid));
 		exit(1);
 	}
+
 
 	int fd = open(SERVER, O_WRONLY);
 	if(fd < 0){
@@ -84,4 +86,3 @@ int main (int argc, char * argv[]){
 
 	return 0;
 }
-

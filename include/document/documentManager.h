@@ -1,12 +1,12 @@
-#ifndef DOCUMENTMANAGER_H
-#define DOCUMENTMANAGER_H
-
 #include "document.h"
 #include <stdio.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
 #include <glib.h>
+
+#ifndef DOCUMENTMANAGER_H
+#define DOCUMENTMANAGER_H
 
 // Struct to store all documents indexed in a GHashTable
 typedef struct{

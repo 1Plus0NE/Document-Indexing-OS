@@ -23,9 +23,10 @@
 
 // Structure to represent a type of a command
 typedef enum commandType{
-    CMD_INDEX,  // -a
-    CMD_REMOVE, // -d
-    CMD_SEARCH, // -c
+    CMD_INDEX,   // -a
+    CMD_REMOVE,  // -d
+    CMD_SEARCH,  // -c
+    CMD_NRLINES, // -l
     CMD_INVALID 
 }CommandType;
 
@@ -36,6 +37,34 @@ typedef struct msg{
     int pid;
     char response[512];
 }Msg;
+
+/**
+ * Verifies if a given directory path exists
+ * 
+ * @param dir_path the directory's path
+ * 
+ * @return 1 if it exists, 0 otherwise
+ */
+int verifyDirectory(char* dir_path);
+
+/**
+ * Creates a FIFO with the given name
+ * 
+ * @param name the FIFO's name
+ * 
+ * @return 1 if FIFO was created with success, 0 otherwise
+ */
+int createFIFO(char* name);
+
+/**
+ * Opens a FIFO with the given name
+ * 
+ * @param name the FIFO's name
+ * @param mode the mode to open the FIFO, eg. O_RDONLY, O_WRONLY
+ * 
+ * @return the file descritptor of the FIFO if it was opened with success, 0 otherwise
+ */
+int openFIFO(char* name, int mode);
 
 /**
  * Validates fields if they exceed a specific size
@@ -54,9 +83,10 @@ int validateFields(char* title, char* authors, char* path);
  * @param command The string representing the user's command (e.g., "-a", "-d", "-c")
  *
  * @returns The corresponding CommandType value:
- *          - CMD_INDEX for "-a"
- *          - CMD_REMOVE for "-d"
- *          - CMD_SEARCH for "-c"
+ *          - CMD_INDEX   for "-a"
+ *          - CMD_REMOVE  for "-d"
+ *          - CMD_SEARCH  for "-c"
+ *          - CMD_NRLINES for "-l"
  *          - CMD_INVALID if the command is not recognized
  */
 CommandType parseCommand(char* command);
@@ -70,7 +100,9 @@ CommandType parseCommand(char* command);
  *          - "-a" for CMD_INDEX
  *          - "-d" for CMD_REMOVE
  *          - "-c" for CMD_SEARCH
+ *          - "-l" for CMD_NRLINES
  *          - "INVALID" for CMD_INVALID
  */
 char* commandTypeToString(CommandType cmd);
+
 #endif
