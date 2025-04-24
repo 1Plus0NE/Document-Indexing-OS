@@ -56,6 +56,7 @@ int main(int argc, char *argv[]){
         // find or remove a document
         if(msg.cmdType == CMD_SEARCH || msg.cmdType == CMD_REMOVE){
             int key = atoi(msg.info);
+            printf("Received Key: %d\n", key);
             if(containsDocumentID(docManager, key)){
                 if(msg.cmdType == CMD_SEARCH){
                     Document* doc = findDocument(docManager, key);
@@ -64,8 +65,9 @@ int main(int argc, char *argv[]){
                     int year = getDocumentYear(doc);
                     char* path = getDocumentPath(doc);
                     snprintf(msg.response, sizeof(msg.response), "Title: %s\nAuthors: %s\nYear: %d\nPath: %s\n", title, authors, year, path);
-                } else if(msg.cmdType == CMD_SEARCH){
+                } else if(msg.cmdType == CMD_REMOVE){
                     removeDocument(docManager, key);
+                    printf("Index entry %d deleted with success.\n", key);
                     snprintf(msg.response, sizeof(msg.response), "Index entry %d deleted with success.\n", key);
                 }   
             } else strcpy(msg.response, "Document's ID provided does not exist.\n");

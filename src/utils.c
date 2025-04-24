@@ -62,3 +62,61 @@ char* commandTypeToString(CommandType cmd){
     }
 }
 
+int validateAndBuildMessage(int argc, char* argv[], Msg* msg, char* client_fifo){
+    msg->cmdType = parseCommand(argv[1]); // first argument
+    switch(msg->cmdType){
+        case CMD_INDEX:
+            if(argc !=6){
+                char* usage = "Incorrect usage!\nIndex Document: -a <title> <authors> <year> <doc_path>\n";
+                write(1, usage, strlen(usage));
+                unlink(client_fifo);
+                return 0;
+            }
+            else if(!validateFields(argv[2], argv[3], argv[5])){
+                char* warning = "Warning: one of the fields exceeds its max size!\n"
+                                "Title MAX SIZE: 200 Bytes\n"
+                                "Authors MAX SIZE: 200 Bytes\n"
+                                "Path MAX SIZE: 64 Bytes.\n";
+                write(1, warning, strlen(warning));
+                unlink(client_fifo);
+                return 0;		
+            }
+            snprintf(msg->info, sizeof(msg->info), "%s|%s|%s|%s", argv[2], argv[3], argv[4], argv[5]); // fields to index a document
+            break;
+
+        case CMD_SEARCH:
+        case CMD_REMOVE:
+            if(argc != 3){
+                char* usage = "Incorrect usage!\nConsult Document: -c <id>\nRemove Document: -d <id>\n";
+                write(1, usage, strlen(usage));
+                unlink(client_fifo);
+                return 0;
+            }
+            strncpy(msg->info, argv[2], sizeof(msg->info) - 1);
+            msg->info[sizeof(msg->info) - 1] = '\0';
+            break;
+        
+        case CMD_NRLINES:
+            if(argc != 4){
+                char* usage = "Incorrect usage!\nNr lines by keyword: -l <id> <keyword>\n";
+                write(1, usage, strlen(usage));
+                unlink(client_fifo);
+                return 0;
+            }
+            snprintf(msg->info, sizeof(msg->info), "%s|%s", argv[2], argv[3]); // eg. 1|sky
+            break;
+
+        case CMD_INVALID:
+        default:
+            char* invalid = "Warning: invalid argument!\n"
+                            "Consider the following commands:\n"
+                            "INDEX: -a " "\"title\" " "\"authors\" " "\"year\" " "\"path\"\n"
+                            "SEARCH: -c " "\"id\"\n"
+                            "REMOVE: -d " "\"id\"\n"
+                            "NR_LINES: -l " "\"id\" " "\"keyword\"\n";
+            write(1, invalid, strlen(invalid));
+            unlink(client_fifo);
+            return 0;
+    }
+    return 1;
+}
