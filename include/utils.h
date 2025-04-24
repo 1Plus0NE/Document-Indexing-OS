@@ -27,6 +27,7 @@ typedef enum commandType{
     CMD_REMOVE,  // -d
     CMD_SEARCH,  // -c
     CMD_NRLINES, // -l
+    CMD_IDLIST,  // -s
     CMD_INVALID 
 }CommandType;
 
@@ -87,6 +88,7 @@ int validateFields(char* title, char* authors, char* path);
  *          - CMD_REMOVE  for "-d"
  *          - CMD_SEARCH  for "-c"
  *          - CMD_NRLINES for "-l"
+ *          - CMD_IDLIST  for "-s"
  *          - CMD_INVALID if the command is not recognized
  */
 CommandType parseCommand(char* command);

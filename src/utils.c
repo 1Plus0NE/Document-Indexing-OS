@@ -44,6 +44,7 @@ CommandType parseCommand(char* command){
     if(strcmp(command, "-d") == 0) return CMD_REMOVE;
     if(strcmp(command, "-c") == 0) return CMD_SEARCH;
     if(strcmp(command, "-l") == 0) return CMD_NRLINES;
+    if(strcmp(command, "-s") == 0) return CMD_IDLIST;
     return CMD_INVALID;
 }
 
@@ -57,8 +58,10 @@ char* commandTypeToString(CommandType cmd){
             return "-c";
         case CMD_NRLINES:
             return "-l";
+        case CMD_IDLIST:
+            return "-s";
         default:
-            return "INVALID";
+            return "INVALID"; // never happens
     }
 }
 
@@ -86,8 +89,9 @@ int validateAndBuildMessage(int argc, char* argv[], Msg* msg, char* client_fifo)
 
         case CMD_SEARCH:
         case CMD_REMOVE:
+        case CMD_IDLIST:
             if(argc != 3){
-                char* usage = "Incorrect usage!\nConsult Document: -c <id>\nRemove Document: -d <id>\n";
+                char* usage = "Incorrect usage!\nConsult Document: -c <id>\nRemove Document: -d <id>\nList IDs keyword: -s <keyword>\n";
                 write(1, usage, strlen(usage));
                 unlink(client_fifo);
                 return 0;

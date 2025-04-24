@@ -108,6 +108,56 @@ int main(int argc, char *argv[]){
             }else strcpy(msg.response, "Document's ID provided does not exist.\n");
         }
 
+        // retrives IDs
+        if(msg.cmdType == CMD_IDLIST){
+            int found = 0; // flag to determine if at least an ID matched keyword
+            char* keyword = strdup(msg.info);
+            memset(msg.response, 0, sizeof(msg.response));
+                
+            GHashTableIter iter;
+            gpointer key_ptr, value_ptr;
+
+            g_hash_table_iter_init(&iter, docManager->documentTable);
+
+            while(g_hash_table_iter_next(&iter, &key_ptr, &value_ptr)){
+                Document* doc = (Document*) value_ptr;
+                char* path = getDocumentPath(doc);
+                int doc_id = getDocumentID(doc);
+
+                int pipe_fd[2]; // read and write
+                pipe(pipe_fd);
+                pid_t child = 0;
+                if((child = fork()) == 0){
+                    // run command
+                    close(pipe_fd[0]);
+                    dup2(pipe_fd[1], STDOUT_FILENO); // redirect stdout to write-end, because of grep's output
+                    char command[128]; // assuming a document file path has 64 bytes, the document folder can also be 64 bytes
+                    snprintf(command, 128, "%s/%s", doc_folder, path); // build path
+                    char* args[] = {"grep", "-c", keyword, command, NULL};
+                    execvp("grep", args);
+                }
+                else{
+                    // waits for child's answer 
+                    close(pipe_fd[1]);
+                    char buffer[64];
+                    read(pipe_fd[0], buffer, sizeof(buffer)); 
+                    int nr_lines = atoi(buffer);
+                    if(nr_lines > 0){
+                        found = 1;
+                        char temp[32];
+                        snprintf(temp, sizeof(temp), "%d ", doc_id);  // format one ID
+                        strncat(msg.response, temp, sizeof(msg.response) - strlen(msg.response) - 1);
+                    }
+                    close(pipe_fd[0]);
+                    waitpid(child, NULL, 0);
+                }
+
+            }
+            if(found) strncat(msg.response, "\n", sizeof(msg.response) - strlen(msg.response) - 1); // add a \n
+            else snprintf(msg.response, sizeof(msg.response), "No document ID has matched the given keyword: %s\n", keyword);
+            free(keyword);
+        }
+
         // answer for client's fifo
         char fifo_name[50];
         sprintf(fifo_name, CLIENT"_%d", msg.pid);
