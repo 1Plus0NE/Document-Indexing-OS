@@ -17,10 +17,11 @@ int main(int argc, char * argv[]){
 	Msg msg;
 	msg.pid = pid;
 	
+	// parses the command and builds an error message if an error is handled, otherwise creates the command request
 	if(!validateAndBuildMessage(argc, argv, &msg, client_name)){
 		_exit(1);
 	}
-	
+
 	int fd = open(SERVER, O_WRONLY);
 	if(fd < 0){
 		perror("Error opening server FIFO");

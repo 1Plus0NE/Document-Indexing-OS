@@ -103,6 +103,7 @@ CommandType parseCommand(char* command);
  *          - "-d" for CMD_REMOVE
  *          - "-c" for CMD_SEARCH
  *          - "-l" for CMD_NRLINES
+ *          - "-s" for CMD_IDLIST
  *          - "INVALID" for CMD_INVALID
  */
 char* commandTypeToString(CommandType cmd);
