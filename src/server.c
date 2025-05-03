@@ -1,5 +1,6 @@
 #include "../include/utils.h"
 #include "../include/document/documentManager.h"
+#include "../include/commandRunner.h"
 
 int main(int argc, char *argv[]){
 
@@ -7,7 +8,8 @@ int main(int argc, char *argv[]){
     DocumentManager* docManager = initDocumentManager();
     char* doc_folder = argv[1];
     int id_number = 1; // document's ID, later on we would like to update this id_number within our load file
-    
+    int isRunning = 1;
+
     if(argc < 2){
         char* usage = "Missing argument!\nUsage: ./server <document-folder>\n";
         write(1, usage, strlen(usage));
@@ -20,14 +22,14 @@ int main(int argc, char *argv[]){
     }
 
     createFIFO(SERVER);
-    write(1, "Server open...\n", sizeof("Server open...\n"));
+    write(1, "Server open ...\n", sizeof("Server open ...\n"));
     int server_fifo = openFIFO(SERVER, O_RDONLY);
 
     // Keep FIFO open by opening a dummy write descriptor
     int dummy_fifo = openFIFO(SERVER, O_WRONLY);
 
     Msg msg;
-    while(1){  
+    while(isRunning){  
         int read_bytes = read(server_fifo, &msg, sizeof(msg));
         if(read_bytes < 0){
 			perror("Error reading from FIFO.");
@@ -37,6 +39,32 @@ int main(int argc, char *argv[]){
         // feedback from client's request
         char* commandRequest = commandTypeToString(msg.cmdType);
         printf("Received a resquest from client [PID: %d]: %s %s\n", msg.pid, commandRequest, msg.info);
+
+        switch(msg.cmdType){
+            case CMD_INDEX:
+                indexRequest(&msg, docManager, &id_number);
+                break;
+            case CMD_SEARCH:
+                searchRequest(&msg, docManager);
+                break;
+            case CMD_REMOVE:
+                removeRequest(&msg, docManager);
+                break;
+            case CMD_NRLINES:
+                nrlinesRequest(&msg, docManager, doc_folder);
+                break;
+            case CMD_IDLIST:
+                idlistRequest(&msg, docManager, doc_folder);
+                break;
+            case CMD_SHUTDOWN:
+                shutdownRequest(&msg, &isRunning);
+                break;
+            default: // never happens supposedly
+                break; 
+        }
+
+
+        /*
 
         // index document
         if(msg.cmdType == CMD_INDEX){
@@ -157,6 +185,15 @@ int main(int argc, char *argv[]){
             else snprintf(msg.response, sizeof(msg.response), "No document ID has matched the given keyword: %s\n", keyword);
             free(keyword);
         }
+
+        // server shutdown request
+        if(msg.cmdType == CMD_SHUTDOWN){
+            printf("Server is shutting down ...\n");
+            snprintf(msg.response, sizeof(msg.response), "Server is shutting down ...\n");
+            isRunning = 0;
+        }
+
+        */
 
         // answer for client's fifo
         char fifo_name[50];

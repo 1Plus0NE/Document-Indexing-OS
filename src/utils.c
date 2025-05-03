@@ -45,6 +45,7 @@ CommandType parseCommand(char* command){
     if(strcmp(command, "-c") == 0) return CMD_SEARCH;
     if(strcmp(command, "-l") == 0) return CMD_NRLINES;
     if(strcmp(command, "-s") == 0) return CMD_IDLIST;
+    if(strcmp(command, "-f") == 0) return CMD_SHUTDOWN;
     return CMD_INVALID;
 }
 
@@ -60,6 +61,8 @@ char* commandTypeToString(CommandType cmd){
             return "-l";
         case CMD_IDLIST:
             return "-s";
+        case CMD_SHUTDOWN:
+            return "-f";
         default:
             return "INVALID"; // never happens
     }
@@ -108,6 +111,17 @@ int validateAndBuildMessage(int argc, char* argv[], Msg* msg, char* client_fifo)
                 return 0;
             }
             snprintf(msg->info, sizeof(msg->info), "%s|%s", argv[2], argv[3]); // eg. 1|sky
+            break;
+
+        case CMD_SHUTDOWN:
+            if(argc != 2){
+                char* usage = "Incorrect usage!\nShutdown Request: -f\n";
+                write(1, usage, strlen(usage));
+                unlink(client_fifo);
+                return 0;
+            }
+            strncpy(msg->info, argv[1], sizeof(msg->info) - 1);
+            msg->info[sizeof(msg->info) - 1] = '\0';
             break;
 
         case CMD_INVALID:

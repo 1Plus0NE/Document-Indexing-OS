@@ -44,6 +44,10 @@ Document* findDocument(DocumentManager* docManager, int key){
     return NULL;
 }
 
+// save documents to do
+
+//void loadDocuments(char* file_docs, DocumentManager* docManager) To Do
+
 void freeDocumentManager(DocumentManager* docManager){
     if(docManager){
         if(docManager -> documentTable){

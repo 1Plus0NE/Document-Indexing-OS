@@ -23,11 +23,12 @@
 
 // Structure to represent a type of a command
 typedef enum commandType{
-    CMD_INDEX,   // -a
-    CMD_REMOVE,  // -d
-    CMD_SEARCH,  // -c
-    CMD_NRLINES, // -l
-    CMD_IDLIST,  // -s
+    CMD_INDEX,    // -a
+    CMD_REMOVE,   // -d
+    CMD_SEARCH,   // -c
+    CMD_NRLINES,  // -l
+    CMD_IDLIST,   // -s
+    CMD_SHUTDOWN, // -f
     CMD_INVALID 
 }CommandType;
 
@@ -84,11 +85,12 @@ int validateFields(char* title, char* authors, char* path);
  * @param command The string representing the user's command (e.g., "-a", "-d", "-c")
  *
  * @returns The corresponding CommandType value:
- *          - CMD_INDEX   for "-a"
- *          - CMD_REMOVE  for "-d"
- *          - CMD_SEARCH  for "-c"
- *          - CMD_NRLINES for "-l"
- *          - CMD_IDLIST  for "-s"
+ *          - CMD_INDEX    for "-a"
+ *          - CMD_REMOVE   for "-d"
+ *          - CMD_SEARCH   for "-c"
+ *          - CMD_NRLINES  for "-l"
+ *          - CMD_IDLIST   for "-s"
+ *          - CMD_SHUTDOWN for "-f"
  *          - CMD_INVALID if the command is not recognized
  */
 CommandType parseCommand(char* command);
@@ -104,6 +106,7 @@ CommandType parseCommand(char* command);
  *          - "-c" for CMD_SEARCH
  *          - "-l" for CMD_NRLINES
  *          - "-s" for CMD_IDLIST
+ *          - "-f" for CMD_SHUTDOWN
  *          - "INVALID" for CMD_INVALID
  */
 char* commandTypeToString(CommandType cmd);
