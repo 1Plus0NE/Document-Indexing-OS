@@ -44,9 +44,62 @@ Document* findDocument(DocumentManager* docManager, int key){
     return NULL;
 }
 
-// save documents to do
+void saveDocuments(DocumentManager* docManager, char* file_docs){
+    int fd = open(file_docs, O_WRONLY | O_CREAT | O_TRUNC, 0644);
+    if(fd < 0){
+        perror("Error opening file");
+        return;
+    }
 
-//void loadDocuments(char* file_docs, DocumentManager* docManager) To Do
+    GHashTableIter iter;
+    gpointer key_ptr, value_ptr;
+    ssize_t bytes_written;
+
+    g_hash_table_iter_init(&iter, docManager->documentTable);
+
+    while(g_hash_table_iter_next(&iter, &key_ptr, &value_ptr)){
+        Document* doc = (Document*) value_ptr;
+        bytes_written = write(fd, doc, sizeof(Document));
+        if(bytes_written != sizeof(Document)){
+            perror("Error writing to file");
+            return;
+        }
+    } 
+    close(fd);
+}
+
+int loadDocuments(DocumentManager* docManager, char* file_docs){
+    int fd = open(file_docs, O_RDONLY);
+    if(fd < 0){
+        perror("File does not exist. Creating a new one...");
+        fd = open(file_docs, O_CREAT | O_RDWR, 0644);
+        if(fd < 0){
+            perror("Error creating file");
+            exit(EXIT_FAILURE);
+        }
+        close(fd);
+        return 1;
+    }
+
+    Document doc;
+    int id_count = 1, document_id;
+
+    while(read(fd, &doc, sizeof(Document)) == sizeof(Document)){
+        Document* loadedDocument = malloc(sizeof(Document));
+        if(!loadedDocument){
+            perror("Error allocating memory for the document");
+            close(fd);
+            return 0;
+        }
+        memcpy(loadedDocument, &doc, sizeof(Document));
+        indexDocument(docManager, loadedDocument);
+        document_id = getDocumentID(loadedDocument);
+        if(document_id >= id_count)
+            id_count = document_id + 1;
+    }
+    close(fd);
+    return id_count; 
+} 
 
 void freeDocumentManager(DocumentManager* docManager){
     if(docManager){

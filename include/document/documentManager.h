@@ -3,6 +3,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include <fcntl.h>
+#include <unistd.h>
+#include <sys/types.h>
 #include <glib.h>
 
 #ifndef DOCUMENTMANAGER_H
@@ -55,6 +58,10 @@ void removeDocument(DocumentManager* docManager, int key);
  * @return The document found
  */
 Document* findDocument(DocumentManager* docManager, int key);
+
+void saveDocuments(DocumentManager* docManager, char* file_docs);
+
+int loadDocuments(DocumentManager* docManager, char* file_docs);
 
 /**
  * Frees the DocumentManager

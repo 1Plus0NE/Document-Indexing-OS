@@ -16,6 +16,9 @@
 // Define server's fifo path and name
 #define SERVER "server_fifo"
 
+// Define document's file path and name
+#define DOCUMENTS "documents.txt"
+
 // Defines the max size for the following fields
 #define TITLE_SIZE   200
 #define AUTHORS_SIZE 200
