@@ -15,8 +15,8 @@ CMD_SRC = $(SRC_DIR)/commandRunner.c
 DOC_SRCS = $(DOC_DIR)/document.c $(DOC_DIR)/documentManager.c
 
 # Executables
-CLIENT_EXEC = $(BIN_DIR)/client
-SERVER_EXEC = $(BIN_DIR)/server
+CLIENT_EXEC = $(BIN_DIR)/dclient
+SERVER_EXEC = $(BIN_DIR)/dserver
 
 # Include directories
 INCLUDES = -I$(INC_DIR) -I$(INC_DIR)/document

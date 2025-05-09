@@ -11,10 +11,10 @@
 #define UTILS_H
 
 // Define client's fifo path and name
-#define CLIENT "client_fifo"
+#define CLIENT "dclient_fifo"
 
 // Define server's fifo path and name
-#define SERVER "server_fifo"
+#define SERVER "dserver_fifo"
 
 // Define document's file path and name
 #define DOCUMENTS "documents.txt"
@@ -40,7 +40,7 @@ typedef struct msg{
     CommandType cmdType;
     char info[512];
     int pid;
-    char response[512];
+    char response[1024];
 }Msg;
 
 /**

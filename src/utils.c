@@ -92,9 +92,8 @@ int validateAndBuildMessage(int argc, char* argv[], Msg* msg, char* client_fifo)
 
         case CMD_SEARCH:
         case CMD_REMOVE:
-        case CMD_IDLIST:
             if(argc != 3){
-                char* usage = "Incorrect usage!\nConsult Document: -c <id>\nRemove Document: -d <id>\nList IDs keyword: -s <keyword>\n";
+                char* usage = "Incorrect usage!\nConsult Document: -c <id>\nRemove Document: -d <id>\n";
                 write(1, usage, strlen(usage));
                 unlink(client_fifo);
                 return 0;
@@ -111,6 +110,17 @@ int validateAndBuildMessage(int argc, char* argv[], Msg* msg, char* client_fifo)
                 return 0;
             }
             snprintf(msg->info, sizeof(msg->info), "%s|%s", argv[2], argv[3]); // eg. 1|sky
+            break;
+
+        case CMD_IDLIST:
+            if(argc < 3 || argc > 4){
+                char* usage = "Incorrect usage!\nList IDs keyword: -s <keyword>\nList IDs keyword: -s <keyword> <nr_processes>\n";
+                write(1, usage, strlen(usage));
+                unlink(client_fifo);
+                return 0;
+            }
+            if(argc == 3) snprintf(msg->info, sizeof(msg->info), "%s|1", argv[2]);
+            else snprintf(msg->info, sizeof(msg->info), "%s|%s", argv[2], argv[3]);
             break;
 
         case CMD_SHUTDOWN:

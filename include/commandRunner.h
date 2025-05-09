@@ -11,6 +11,15 @@
 #define COMMANDRUNNER_H
 
 /**
+ * Struct responsible to keep track of a process
+ */
+typedef struct{
+    pid_t pid;
+    int pipe_fd;
+    int doc_id;
+}ProcInfo;
+
+/**
  * Indexes a document into the DocumentManager structure and updates the Document ID counter
  * 
  * @param Msg pointer to the Msg structure containing the indexing request (msg.cmdTye) and where the response will be stored (msg.response)
@@ -52,6 +61,17 @@ void nrlinesRequest(Msg* msg, DocumentManager* docManager, char* doc_folder);
  * @param doc_folder path where client's documents are locally stored
  */
 void idlistRequest(Msg* msg, DocumentManager* docManager, char* doc_folder);
+
+/**
+ * Processes an ID list request concurrently by scanning all documents in the DocumentManager.
+ * Using up to "nr_processes" to search for a given keyword across all indexed documents.
+ * 
+ * @param Msg pointer to the Msg structure containing the id list request (msg.cmdTye) and where the response will be stored (msg.response)
+ * @param DocManager pointer to the DocumentManager structure that manages all documents
+ * @param doc_folder path where client's documents are locally stored
+ * @param nr_processes the number of processes to run simultaneously
+ */ 
+void idlistProcessesRequest(Msg* msg, DocumentManager* docManager, char* doc_folder, int nr_processes);
 
 /**
  * Request to shutdown the server and updates isRunning variable

@@ -59,8 +59,22 @@ void removeDocument(DocumentManager* docManager, int key);
  */
 Document* findDocument(DocumentManager* docManager, int key);
 
+/**
+ * Saves all documents indexed in the system before shutdown
+ * 
+ * @param docManager The structure to write all documents in the binary file
+ * @param doc_files The file to write all documents
+ */
 void saveDocuments(DocumentManager* docManager, char* file_docs);
 
+/**
+ * Loads all documents written in a binary file and indexes them back to the system
+ * 
+ * @param docManager The structure to index all documents in the binary file
+ * @param doc_files The file to read all documents
+ * 
+ * @return The current id number for the next documents to be indexed
+ */
 int loadDocuments(DocumentManager* docManager, char* file_docs);
 
 /**
@@ -72,4 +86,3 @@ int loadDocuments(DocumentManager* docManager, char* file_docs);
 void freeDocumentManager(DocumentManager* docManager);
 
 #endif
-
