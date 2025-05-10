@@ -8,6 +8,11 @@ DocumentManager* initDocumentManager(){
     }
 
     docManager -> documentTable = g_hash_table_new_full(g_int_hash, g_int_equal, free, (GDestroyNotify)freeDocument);
+    if(!docManager -> documentTable){
+        perror("Error alocating memory for the Documents HashTable.");
+        free(docManager);
+        exit(EXIT_FAILURE);
+    }
 
     return docManager;
 }
@@ -71,7 +76,7 @@ void saveDocuments(DocumentManager* docManager, char* file_docs){
 int loadDocuments(DocumentManager* docManager, char* file_docs){
     int fd = open(file_docs, O_RDONLY);
     if(fd < 0){
-        perror("File does not exist. Creating a new one...");
+        perror("Documents file does not exist. Creating a new one...");
         fd = open(file_docs, O_CREAT | O_RDWR, 0644);
         if(fd < 0){
             perror("Error creating file");

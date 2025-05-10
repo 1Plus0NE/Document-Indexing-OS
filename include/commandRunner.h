@@ -10,6 +10,8 @@
 #ifndef COMMANDRUNNER_H
 #define COMMANDRUNNER_H
 
+#include "cache.h"
+
 /**
  * Struct responsible to keep track of a process
  */
@@ -29,10 +31,12 @@ typedef struct{
 void indexRequest(Msg* msg, DocumentManager* docManager, int* id_number);
 
 /**
- * Searches for a document in the DocumentManager structure and send its info through Msg structure
+ * Searches for a document both in Cache and in the DocumentManager structure and send its info through Msg structure
+ * If a document is in the Cache it is returned via Cache, otherwise via DocumentManager
  * 
  * @param Msg pointer to the Msg structure containing the searching request (msg.cmdTye) and where the response will be stored (msg.response)
  * @param DocManager pointer to the DocumentManager structure that manages all documents
+ * @param Cache pointer to the Cache structure that stores documents depending on its size
  */
 void searchRequest(Msg* msg, DocumentManager* docManager);
 
@@ -41,6 +45,7 @@ void searchRequest(Msg* msg, DocumentManager* docManager);
  * 
  * @param Msg pointer to the Msg structure containing the remove request (msg.cmdTye) and where the response will be stored (msg.response)
  * @param DocManager pointer to the DocumentManager structure that manages all documents
+ * @param Cache pointer to the Cache structure that stores documents depending on its size
  */
 void removeRequest(Msg* msg, DocumentManager* docManager);
 

@@ -19,6 +19,7 @@ void indexRequest(Msg* msg, DocumentManager* docManager, int* id_number){
 void searchRequest(Msg* msg, DocumentManager* docManager){
     int key = atoi(msg->info);
     printf("Received Key: %d\n", key);
+
     if(containsDocumentID(docManager, key)){
         Document* doc = findDocument(docManager, key);
         char* title = getDocumentTitle(doc);
@@ -27,12 +28,34 @@ void searchRequest(Msg* msg, DocumentManager* docManager){
         char* path = getDocumentPath(doc);
         snprintf(msg->response, sizeof(msg->response), "Title: %s\nAuthors: %s\nYear: %d\nPath: %s\n", title, authors, year, path);
     } else strcpy(msg->response, "Document's ID provided does not exist.\n");
+
+    /*
+    CacheEntry* entry = searchCacheEntry(cache, key);
+    if(entry){ // if an entry was found in the cache
+        char* title = getDocumentTitle(entry->metaInfo);
+        char* authors = getDocumentAuthors(entry->metaInfo);
+        int year = getDocumentYear(entry->metaInfo);
+        char* path = getDocumentPath(entry->metaInfo);
+        snprintf(msg->response, sizeof(msg->response), "Title: %s\nAuthors: %s\nYear: %d\nPath: %s\n", title, authors, year, path);
+    }
+
+    else if(containsDocumentID(docManager, key)){
+        Document* doc = findDocument(docManager, key);
+        insertCache(cache, key, doc); // insert the entry to the cache, so maybe next time it will be a hit
+        char* title = getDocumentTitle(doc);
+        char* authors = getDocumentAuthors(doc);
+        int year = getDocumentYear(doc);
+        char* path = getDocumentPath(doc);
+        snprintf(msg->response, sizeof(msg->response), "Title: %s\nAuthors: %s\nYear: %d\nPath: %s\n", title, authors, year, path);
+    } else strcpy(msg->response, "Document's ID provided does not exist.\n");
+    */
 }
 
 void removeRequest(Msg* msg, DocumentManager* docManager){
     int key = atoi(msg->info);
     printf("Received Key: %d\n", key);
     if(containsDocumentID(docManager, key)){
+        //removeCacheEntry(cache, key); // remove the entry from the cache if exists in case
         removeDocument(docManager, key);
         printf("Index entry %d deleted with success.\n", key);
         snprintf(msg->response, sizeof(msg->response), "Index entry %d deleted with success.\n", key);

@@ -1,25 +1,28 @@
 #include "../include/utils.h"
 #include "../include/document/documentManager.h"
 #include "../include/commandRunner.h"
+#include "../include/cache.h"
 
 int main(int argc, char *argv[]){
-
-    unlink(SERVER);  
-    DocumentManager* docManager = initDocumentManager();
-    char* doc_folder = argv[1];
-    int id_number = loadDocuments(docManager, DOCUMENTS);; // document's ID
-    int isRunning = 1;
-
-    if(argc < 2){
-        char* usage = "Missing argument!\nUsage: ./server <document-folder>\n";
+  
+    if(argc < 3){
+        char* usage = "Missing argument!\nUsage: ./dserver <document-folder> <cache_size>\n";
         write(1, usage, strlen(usage));
         return 0;
     }
 
+    char* doc_folder = argv[1];
     if(!verifyDirectory(doc_folder)){
         perror("Invalid document folder");
         return 0;
     }
+
+    unlink(SERVER);
+    DocumentManager* docManager = initDocumentManager();
+    int id_number = loadDocuments(docManager, DOCUMENTS);; // document's ID
+    int isRunning = 1;
+    int capacity = atoi(argv[2]);
+    Cache* cache = initCache(capacity, 0); // 0 -> FIFO
 
     createFIFO(SERVER);
     write(1, "Server open ...\n", sizeof("Server open ...\n"));
@@ -105,6 +108,7 @@ int main(int argc, char *argv[]){
     close(dummy_fifo);
     saveDocuments(docManager, DOCUMENTS);
     freeDocumentManager(docManager);
+    freeCache(cache);
     unlink(SERVER);
 
     return 0;
