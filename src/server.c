@@ -5,7 +5,7 @@
 
 int main(int argc, char *argv[]){
   
-    if(argc < 3){
+    if(argc != 3){
         char* usage = "Missing argument!\nUsage: ./dserver <document-folder> <cache_size>\n";
         write(1, usage, strlen(usage));
         return 0;
@@ -51,7 +51,7 @@ int main(int argc, char *argv[]){
                 if(msg.cmdType == CMD_INDEX)
                     indexRequest(&msg, docManager, &id_number);
                 else if(msg.cmdType == CMD_REMOVE)
-                    removeRequest(&msg, docManager);
+                    removeRequest(&msg, docManager, cache);
                 else if(msg.cmdType == CMD_SHUTDOWN)
                     shutdownRequest(&msg, &isRunning);
 
@@ -62,17 +62,53 @@ int main(int argc, char *argv[]){
                 write(fd_client, &msg, sizeof(msg));
                 close(fd_client);
             } break;
+            
+            // search handles a cache
+            case CMD_SEARCH:{
+                int pipe_fd[2];
+                pipe(pipe_fd);
 
-            case CMD_SEARCH:
+                pid_t pid = fork();
+                if(pid == 0){
+                    // Child
+                    close(pipe_fd[0]); // close read-end
+                    searchRequest(&msg, docManager, cache, pipe_fd[1]);
+
+                    // answer to client's fifo
+                    char fifo_name[50];
+                    sprintf(fifo_name, CLIENT"_%d", msg.pid);
+                    int fd_client = openFIFO(fifo_name, O_WRONLY);
+                    write(fd_client, &msg, sizeof(msg));
+                    close(fd_client);
+                    exit(0);
+                } 
+                else{
+                    // Parent
+                    close(pipe_fd[1]); // close write-end
+                    waitpid(pid, NULL, 0); // wait for child
+
+                    CacheResult result;
+                    read(pipe_fd[0], &result, sizeof(result));
+                    close(pipe_fd[0]);
+
+                    if(result.was_hit){
+                        // Update LRU access order and hit count
+                        searchCacheEntry(cache, result.doc_id, 0);  // full cache update
+                    }else{
+                        Document* doc = findDocument(docManager, result.doc_id);
+                        if(doc) insertCache(cache, result.doc_id, doc); // in case of miss we have to insert the doc to the cache 
+                    }
+                }
+                break;
+            }
+            
             case CMD_NRLINES:
             case CMD_IDLIST:
             { // Handle search commands in a forked child, so we prevent a client to be stuck
                 pid_t pid = fork();
                 if(pid == 0){
                     // Child process
-                    if(msg.cmdType == CMD_SEARCH)
-                        searchRequest(&msg, docManager);
-                    else if(msg.cmdType == CMD_NRLINES)
+                    if(msg.cmdType == CMD_NRLINES)
                         nrlinesRequest(&msg, docManager, doc_folder);
                     else if(msg.cmdType == CMD_IDLIST){
                         char* keyword = strtok(msg.info, "|");
@@ -108,6 +144,7 @@ int main(int argc, char *argv[]){
     close(dummy_fifo);
     saveDocuments(docManager, DOCUMENTS);
     freeDocumentManager(docManager);
+    cacheReport(cache);
     freeCache(cache);
     unlink(SERVER);
 

@@ -30,7 +30,6 @@ typedef struct{
  * 
  * @return The document created
  */
-
 Document* createDocument(char* title, char* authors, char* path, int year, int id);
 
 /**
@@ -82,7 +81,6 @@ char* getDocumentPath(Document* doc);
  * Frees the Document
  * 
  * @param docManager The Document structure to be freed
- * 
  */
 void freeDocument(Document* doc);
 

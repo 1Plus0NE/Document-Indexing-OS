@@ -22,6 +22,14 @@ typedef struct{
 }ProcInfo;
 
 /**
+ * Struct responsible to give Cache feedback
+ */
+typedef struct{
+    int doc_id;
+    int was_hit; // 1 = hit, 0 = miss
+}CacheResult;
+
+/**
  * Indexes a document into the DocumentManager structure and updates the Document ID counter
  * 
  * @param Msg pointer to the Msg structure containing the indexing request (msg.cmdTye) and where the response will be stored (msg.response)
@@ -37,8 +45,9 @@ void indexRequest(Msg* msg, DocumentManager* docManager, int* id_number);
  * @param Msg pointer to the Msg structure containing the searching request (msg.cmdTye) and where the response will be stored (msg.response)
  * @param DocManager pointer to the DocumentManager structure that manages all documents
  * @param Cache pointer to the Cache structure that stores documents depending on its size
+ * @param notify_fd pipe fd to write the result
  */
-void searchRequest(Msg* msg, DocumentManager* docManager);
+void searchRequest(Msg* msg, DocumentManager* docManager, Cache* cache, int notify_fd);
 
 /**
  * Removes a document from the DocumentManager structure
@@ -47,7 +56,7 @@ void searchRequest(Msg* msg, DocumentManager* docManager);
  * @param DocManager pointer to the DocumentManager structure that manages all documents
  * @param Cache pointer to the Cache structure that stores documents depending on its size
  */
-void removeRequest(Msg* msg, DocumentManager* docManager);
+void removeRequest(Msg* msg, DocumentManager* docManager, Cache* cache);
 
 /**
  * Counts the document's number of lines, in the DocumentManager structure, that matches a given keyword

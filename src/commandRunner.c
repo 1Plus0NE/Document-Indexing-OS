@@ -16,46 +16,43 @@ void indexRequest(Msg* msg, DocumentManager* docManager, int* id_number){
     (*id_number)++; // update so the next document never has the same ID from the previous doc
 }
 
-void searchRequest(Msg* msg, DocumentManager* docManager){
+void searchRequest(Msg* msg, DocumentManager* docManager, Cache* cache, int notify_fd){
     int key = atoi(msg->info);
-    printf("Received Key: %d\n", key);
+    CacheEntry* entry = searchCacheEntry(cache, key, 1); // child is readonly
 
-    if(containsDocumentID(docManager, key)){
-        Document* doc = findDocument(docManager, key);
-        char* title = getDocumentTitle(doc);
-        char* authors = getDocumentAuthors(doc);
-        int year = getDocumentYear(doc);
-        char* path = getDocumentPath(doc);
-        snprintf(msg->response, sizeof(msg->response), "Title: %s\nAuthors: %s\nYear: %d\nPath: %s\n", title, authors, year, path);
-    } else strcpy(msg->response, "Document's ID provided does not exist.\n");
+    // Arguments to store for cache feedback
+    CacheResult result = {
+        .doc_id = key,
+        .was_hit = (entry != NULL) // hit if entry exists, miss otherwise
+    };
 
-    /*
-    CacheEntry* entry = searchCacheEntry(cache, key);
-    if(entry){ // if an entry was found in the cache
-        char* title = getDocumentTitle(entry->metaInfo);
-        char* authors = getDocumentAuthors(entry->metaInfo);
-        int year = getDocumentYear(entry->metaInfo);
-        char* path = getDocumentPath(entry->metaInfo);
-        snprintf(msg->response, sizeof(msg->response), "Title: %s\nAuthors: %s\nYear: %d\nPath: %s\n", title, authors, year, path);
+    if(entry){
+        Document* doc = entry->metaInfo;
+        snprintf(msg->response, sizeof(msg->response), "Title: %s\nAuthors: %s\nYear: %d\nPath: %s\n",
+                 getDocumentTitle(doc),
+                 getDocumentAuthors(doc),
+                 getDocumentYear(doc),
+                 getDocumentPath(doc));
     }
-
     else if(containsDocumentID(docManager, key)){
         Document* doc = findDocument(docManager, key);
-        insertCache(cache, key, doc); // insert the entry to the cache, so maybe next time it will be a hit
-        char* title = getDocumentTitle(doc);
-        char* authors = getDocumentAuthors(doc);
-        int year = getDocumentYear(doc);
-        char* path = getDocumentPath(doc);
-        snprintf(msg->response, sizeof(msg->response), "Title: %s\nAuthors: %s\nYear: %d\nPath: %s\n", title, authors, year, path);
+        snprintf(msg->response, sizeof(msg->response), "Title: %s\nAuthors: %s\nYear: %d\nPath: %s\n",
+                 getDocumentTitle(doc),
+                 getDocumentAuthors(doc),
+                 getDocumentYear(doc),
+                 getDocumentPath(doc));
     } else strcpy(msg->response, "Document's ID provided does not exist.\n");
-    */
+    
+    // Send cache feedback to parent
+    write(notify_fd, &result, sizeof(result));
+    close(notify_fd);
 }
 
-void removeRequest(Msg* msg, DocumentManager* docManager){
+void removeRequest(Msg* msg, DocumentManager* docManager, Cache* cache){
     int key = atoi(msg->info);
     printf("Received Key: %d\n", key);
     if(containsDocumentID(docManager, key)){
-        //removeCacheEntry(cache, key); // remove the entry from the cache if exists in case
+        removeCacheEntry(cache, key); // remove the entry from the cache in case exists
         removeDocument(docManager, key);
         printf("Index entry %d deleted with success.\n", key);
         snprintf(msg->response, sizeof(msg->response), "Index entry %d deleted with success.\n", key);
