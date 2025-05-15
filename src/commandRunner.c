@@ -18,6 +18,7 @@ void indexRequest(Msg* msg, DocumentManager* docManager, int* id_number){
 
 void searchRequest(Msg* msg, DocumentManager* docManager, Cache* cache, int notify_fd){
     int key = atoi(msg->info);
+    gettimeofday(&msg->start_time, NULL);
     CacheEntry* entry = searchCacheEntry(cache, key, 1); // child is readonly
 
     // Arguments to store for cache feedback
@@ -27,20 +28,30 @@ void searchRequest(Msg* msg, DocumentManager* docManager, Cache* cache, int noti
     };
 
     if(entry){
+        struct timeval end_time, duration;
+        gettimeofday(&end_time, NULL);  
+        timersub(&end_time, &msg->start_time, &duration); 
         Document* doc = entry->metaInfo;
-        snprintf(msg->response, sizeof(msg->response), "Title: %s\nAuthors: %s\nYear: %d\nPath: %s\n",
+        snprintf(msg->response, sizeof(msg->response), "Title: %s\nAuthors: %s\nYear: %d\nPath: %s\nDocument retrieved from cache within %ld.%06ld seconds\n",
                  getDocumentTitle(doc),
                  getDocumentAuthors(doc),
                  getDocumentYear(doc),
-                 getDocumentPath(doc));
+                 getDocumentPath(doc),
+                 duration.tv_sec,
+                 duration.tv_usec);
     }
     else if(containsDocumentID(docManager, key)){
         Document* doc = findDocument(docManager, key);
-        snprintf(msg->response, sizeof(msg->response), "Title: %s\nAuthors: %s\nYear: %d\nPath: %s\n",
+        struct timeval end_time, duration;
+        gettimeofday(&end_time, NULL);  
+        timersub(&end_time, &msg->start_time, &duration); 
+        snprintf(msg->response, sizeof(msg->response), "Title: %s\nAuthors: %s\nYear: %d\nPath: %s\nDocument retrieved from Document Manager within  %ld.%06ld seconds\n",
                  getDocumentTitle(doc),
                  getDocumentAuthors(doc),
                  getDocumentYear(doc),
-                 getDocumentPath(doc));
+                 getDocumentPath(doc),
+                 duration.tv_sec,
+                 duration.tv_usec);
     } else strcpy(msg->response, "Document's ID provided does not exist.\n");
     
     // Send cache feedback to parent
