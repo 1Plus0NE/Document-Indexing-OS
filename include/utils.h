@@ -37,14 +37,14 @@ typedef enum commandType{
 }CommandType;
 
 // Structure to represent a command to run
-typedef struct msg{
+typedef struct request{
     CommandType cmdType;
     char info[512];
     int pid;
     int duration;
     char response[1024];
     struct timeval start_time;
-}Msg;
+}Request;
 
 /**
  * Verifies if a given directory path exists
@@ -122,11 +122,11 @@ char* commandTypeToString(CommandType cmd);
  * 
  * @param argc the number of command-line arguments
  * @param argv the array of command-lines arguments
- * @param msg the command request structure
+ * @param request the command request structure
  * @param client_fifo the client's fifo name, used for cleanup if needed
  * 
  * @return 1 if the validation succeeds and the message is build, 0 on error
  */
-int validateAndBuildMessage(int argc, char* argv[], Msg* msg, char* client_fifo);
+int validateAndBuildMessage(int argc, char* argv[], Request* request, char* client_fifo);
 
 #endif

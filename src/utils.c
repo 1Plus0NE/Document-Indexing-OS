@@ -68,9 +68,9 @@ char* commandTypeToString(CommandType cmd){
     }
 }
 
-int validateAndBuildMessage(int argc, char* argv[], Msg* msg, char* client_fifo){
-    msg->cmdType = parseCommand(argv[1]); // first argument
-    switch(msg->cmdType){
+int validateAndBuildMessage(int argc, char* argv[], Request* request, char* client_fifo){
+    request->cmdType = parseCommand(argv[1]); // first argument
+    switch(request->cmdType){
         case CMD_INDEX:
             if(argc !=6){
                 char* usage = "Incorrect usage!\nIndex Document: -a <title> <authors> <year> <doc_path>\n";
@@ -87,7 +87,7 @@ int validateAndBuildMessage(int argc, char* argv[], Msg* msg, char* client_fifo)
                 unlink(client_fifo);
                 return 0;		
             }
-            snprintf(msg->info, sizeof(msg->info), "%s|%s|%s|%s", argv[2], argv[3], argv[4], argv[5]); // fields to index a document
+            snprintf(request->info, sizeof(request->info), "%s|%s|%s|%s", argv[2], argv[3], argv[4], argv[5]); // fields to index a document
             break;
 
         case CMD_SEARCH:
@@ -98,8 +98,8 @@ int validateAndBuildMessage(int argc, char* argv[], Msg* msg, char* client_fifo)
                 unlink(client_fifo);
                 return 0;
             }
-            strncpy(msg->info, argv[2], sizeof(msg->info) - 1);
-            msg->info[sizeof(msg->info) - 1] = '\0';
+            strncpy(request->info, argv[2], sizeof(request->info) - 1);
+            request->info[sizeof(request->info) - 1] = '\0';
             break;
         
         case CMD_NRLINES:
@@ -109,7 +109,7 @@ int validateAndBuildMessage(int argc, char* argv[], Msg* msg, char* client_fifo)
                 unlink(client_fifo);
                 return 0;
             }
-            snprintf(msg->info, sizeof(msg->info), "%s|%s", argv[2], argv[3]); // eg. 1|sky
+            snprintf(request->info, sizeof(request->info), "%s|%s", argv[2], argv[3]); // eg. 1|sky
             break;
 
         case CMD_IDLIST:
@@ -119,8 +119,8 @@ int validateAndBuildMessage(int argc, char* argv[], Msg* msg, char* client_fifo)
                 unlink(client_fifo);
                 return 0;
             }
-            if(argc == 3) snprintf(msg->info, sizeof(msg->info), "%s|1", argv[2]);
-            else snprintf(msg->info, sizeof(msg->info), "%s|%s", argv[2], argv[3]);
+            if(argc == 3) snprintf(request->info, sizeof(request->info), "%s|1", argv[2]);
+            else snprintf(request->info, sizeof(request->info), "%s|%s", argv[2], argv[3]);
             break;
 
         case CMD_SHUTDOWN:
@@ -130,8 +130,8 @@ int validateAndBuildMessage(int argc, char* argv[], Msg* msg, char* client_fifo)
                 unlink(client_fifo);
                 return 0;
             }
-            strncpy(msg->info, argv[1], sizeof(msg->info) - 1);
-            msg->info[sizeof(msg->info) - 1] = '\0';
+            strncpy(request->info, argv[1], sizeof(request->info) - 1);
+            request->info[sizeof(request->info) - 1] = '\0';
             break;
 
         case CMD_INVALID:

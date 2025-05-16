@@ -31,35 +31,35 @@ int main(int argc, char *argv[]){
     // Keep FIFO open by opening a dummy write descriptor
     int dummy_fifo = openFIFO(SERVER, O_WRONLY);
 
-    Msg msg;
+    Request request;
     while(isRunning){
-        int read_bytes = read(server_fifo, &msg, sizeof(msg));
+        int read_bytes = read(server_fifo, &request, sizeof(request));
         if(read_bytes < 0){
             perror("Error reading from FIFO.");
             break;
         }
 
         // feedback from client's request
-        char* commandRequest = commandTypeToString(msg.cmdType);
-        printf("Received a request from client [PID: %d]: %s %s\n", msg.pid, commandRequest, msg.info);
+        char* commandRequest = commandTypeToString(request.cmdType);
+        printf("Received a request from client [PID: %d]: %s %s\n", request.pid, commandRequest, request.info);
 
-        switch(msg.cmdType){
+        switch(request.cmdType){
             case CMD_INDEX:
             case CMD_REMOVE:
             case CMD_SHUTDOWN:
             { // handle basic commands in parent
-                if(msg.cmdType == CMD_INDEX)
-                    indexRequest(&msg, docManager, &id_number);
-                else if(msg.cmdType == CMD_REMOVE)
-                    removeRequest(&msg, docManager, cache);
-                else if(msg.cmdType == CMD_SHUTDOWN)
-                    shutdownRequest(&msg, &isRunning);
+                if(request.cmdType == CMD_INDEX)
+                    indexRequest(&request, docManager, &id_number);
+                else if(request.cmdType == CMD_REMOVE)
+                    removeRequest(&request, docManager, cache);
+                else if(request.cmdType == CMD_SHUTDOWN)
+                    shutdownRequest(&request, &isRunning);
 
                 // answer to client's fifo
                 char fifo_name[50];
-                sprintf(fifo_name, CLIENT"_%d", msg.pid);
+                sprintf(fifo_name, CLIENT"_%d", request.pid);
                 int fd_client = openFIFO(fifo_name, O_WRONLY);
-                write(fd_client, &msg, sizeof(msg));
+                write(fd_client, &request, sizeof(request));
                 close(fd_client);
             } break;
             
@@ -72,13 +72,13 @@ int main(int argc, char *argv[]){
                 if(pid == 0){
                     // Child
                     close(pipe_fd[0]); // close read-end
-                    searchRequest(&msg, docManager, cache, pipe_fd[1]);
+                    searchRequest(&request, docManager, cache, pipe_fd[1]);
 
                     // answer to client's fifo
                     char fifo_name[50];
-                    sprintf(fifo_name, CLIENT"_%d", msg.pid);
+                    sprintf(fifo_name, CLIENT"_%d", request.pid);
                     int fd_client = openFIFO(fifo_name, O_WRONLY);
-                    write(fd_client, &msg, sizeof(msg));
+                    write(fd_client, &request, sizeof(request));
                     close(fd_client);
                     exit(0);
                 } 
@@ -108,26 +108,26 @@ int main(int argc, char *argv[]){
                 pid_t pid = fork();
                 if(pid == 0){
                     // Child process
-                    if(msg.cmdType == CMD_NRLINES)
-                        nrlinesRequest(&msg, docManager, doc_folder);
-                    else if(msg.cmdType == CMD_IDLIST){
-                        char* keyword = strtok(msg.info, "|");
+                    if(request.cmdType == CMD_NRLINES)
+                        nrlinesRequest(&request, docManager, doc_folder);
+                    else if(request.cmdType == CMD_IDLIST){
+                        char* keyword = strtok(request.info, "|");
                         char* nr_processes_str = strtok(NULL, "|");
                         int nr_processes = atoi(nr_processes_str);
-                        strcpy(msg.info, keyword);
+                        strcpy(request.info, keyword);
                     
                         if(nr_processes < 1) // nr_processes cannot be negative
-                            snprintf(msg.response, sizeof(msg.response), "Invalid number of processes: %d\n", nr_processes);                           
+                            snprintf(request.response, sizeof(request.response), "Invalid number of processes: %d\n", nr_processes);                           
                         else if(nr_processes == 1) // single process 
-                            idlistRequest(&msg, docManager, doc_folder);
+                            idlistRequest(&request, docManager, doc_folder);
                         else // N processes 
-                            idlistProcessesRequest(&msg, docManager, doc_folder, nr_processes);
+                            idlistProcessesRequest(&request, docManager, doc_folder, nr_processes);
                     }
                     // answer to client's fifo
                     char fifo_name[50];
-                    sprintf(fifo_name, CLIENT"_%d", msg.pid);
+                    sprintf(fifo_name, CLIENT"_%d", request.pid);
                     int fd_client = openFIFO(fifo_name, O_WRONLY);
-                    write(fd_client, &msg, sizeof(msg));
+                    write(fd_client, &request, sizeof(request));
                     close(fd_client);
 
                     exit(0); // Child done
