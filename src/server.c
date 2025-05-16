@@ -41,7 +41,10 @@ int main(int argc, char *argv[]){
 
         // feedback from client's request
         char* commandRequest = commandTypeToString(request.cmdType);
-        printf("Received a request from client [PID: %d]: %s %s\n", request.pid, commandRequest, request.info);
+        if(request.cmdType == CMD_SHUTDOWN) // because it prints -f twice
+            printf("Received a request from client [PID: %d]: %s\n", request.pid, commandRequest);
+        else 
+            printf("Received a request from client [PID: %d]: %s %s\n", request.pid, commandRequest, request.info);
 
         switch(request.cmdType){
             case CMD_INDEX:

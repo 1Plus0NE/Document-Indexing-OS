@@ -61,7 +61,7 @@ void searchRequest(Request* request, DocumentManager* docManager, Cache* cache, 
 
 void removeRequest(Request* request, DocumentManager* docManager, Cache* cache){
     int key = atoi(request->info);
-    printf("Received Key: %d\n", key);
+    //printf("Received Key: %d\n", key);
     if(containsDocumentID(docManager, key)){
         removeCacheEntry(cache, key); // remove the entry from the cache in case exists
         removeDocument(docManager, key);

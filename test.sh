@@ -6,8 +6,8 @@ TEST_DIR="../tests/run_$TIMESTAMP"
 mkdir -p "$TEST_DIR"
 
 OUTFILE="$TEST_DIR/test_results.csv"
-DOC_IDS=(1 2 3 4 5 6 7 8 9 10)   # Replace with actual IDs
-KEYWORDS=("war" "science" "artificial" "data")  # Replace with real keywords
+DOC_IDS=(1 2 3 4 5 6 7 8 9 10 1 2 3) 
+KEYWORDS=("war" "science" "artificial" "data")  
 PROCESSES=(1 2 4 8 16 32)
 
 echo "command,arg,processes,time_ms" > "$OUTFILE"
