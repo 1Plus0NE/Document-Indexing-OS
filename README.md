@@ -1,6 +1,6 @@
 # Operating Systems
 
-# Grade: 17/20 ⭐️
+# Grade: 17.25/20 ⭐️
 
 Implementation of a service, server-client, that allows indexing and searching text documents stored locally on a computer.
 
